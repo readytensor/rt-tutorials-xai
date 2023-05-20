@@ -1,0 +1,4 @@
+{
+  "validation_split": 0.1,
+  "prediction_field_name": "prediction"
+}
