@@ -1,7 +1,6 @@
 from typing import List, Dict, Tuple
 import joblib 
 
-from config import paths
 from utils import read_json_as_dict
 
 class BinaryClassificationSchema:
@@ -10,7 +9,7 @@ class BinaryClassificationSchema:
     users to work with a generic schema for binary classification problems, enabling them to
     create algorithm implementations that are not hardcoded to specific feature names. The class
     provides methods to retrieve information about the schema, such as the ID field, target field,
-    allowed values for the target field, and details of the predictor fields (categorical and numeric).
+    allowed values for the target field, and details of the features (categorical and numeric).
     This makes it easier to preprocess and manipulate the input data according to the schema,
     regardless of the specific dataset used.
     """
@@ -27,14 +26,14 @@ class BinaryClassificationSchema:
         self._numeric_features, self._categorical_features = self._get_features()
 
     @property
-    def problem_category(self) -> str:
+    def model_category(self) -> str:
         """
-        Gets the problem category.
+        Gets the model category.
 
         Returns:
-            str: The category of the machine learning problem (e.g., binary_classification, multi-class_classification, regression, object_detection, etc.).
+            str: The category of the machine learning model (e.g., binary_classification, multi-class_classification, regression, object_detection, etc.).
         """
-        return self.schema["problemCategory"]
+        return self.schema["modelCategory"]
 
     @property
     def title(self) -> str:
@@ -57,14 +56,14 @@ class BinaryClassificationSchema:
         return self.schema["description"]
 
     @property
-    def version(self) -> float:
+    def schema_version(self) -> float:
         """
         Gets the version number of the schema.
 
         Returns:
             float: The version number of the schema.
         """
-        return self.schema["version"]
+        return self.schema["schemaVersion"]
 
     @property
     def input_data_format(self) -> str:
@@ -83,7 +82,7 @@ class BinaryClassificationSchema:
         Returns:
             Tuple[List[str], List[str]]: The list of numeric feature names, and the list of categorical feature names.
         """
-        fields = self.schema["predictors"]
+        fields = self.schema["features"]
         numeric_features = [f["name"] for f in fields if f["dataType"] == "NUMERIC"]
         categorical_features = [f["name"] for f in fields if f["dataType"] == "CATEGORICAL"]
         return numeric_features, categorical_features
@@ -119,14 +118,14 @@ class BinaryClassificationSchema:
         return self.schema["target"]["name"]
 
     @property
-    def allowed_target_values(self) -> List[str]:
+    def target_classes(self) -> List[str]:
         """
-        Gets the allowed values for the target field.
+        Gets the classes for the target field.
 
         Returns:
-            List[str]: The list of allowed values for the target field.
+            List[str]: The list of allowed classes for the target field.
         """
-        return [str(c) for c in self.schema["target"]["allowedValues"]]
+        return [str(c) for c in self.schema["target"]["classes"]]
 
     @property
     def positive_class(self) -> str:
@@ -136,7 +135,7 @@ class BinaryClassificationSchema:
         Returns:
             str: The positive class for the target.
         """
-        return str(self.schema["target"]["allowedValues"][1])
+        return str(self.schema["target"]["classes"][1])
 
     @property
     def target_description(self) -> str:
@@ -176,11 +175,11 @@ class BinaryClassificationSchema:
         Returns:
             Dict[str, List[str]]: A dictionary of categorical feature names and their corresponding allowed values.
         """
-        fields = self.schema["predictors"]
+        features = self.schema["features"]
         allowed_values = {}
-        for field in fields:
-            if field["dataType"] == "CATEGORICAL":
-                allowed_values[field["name"]] = field["allowedValues"]
+        for feature in features:
+            if feature["dataType"] == "CATEGORICAL":
+                allowed_values[feature["name"]] = feature["categories"]
         return allowed_values
 
     def get_allowed_values_for_categorical_feature(self, feature_name: str) -> List[str]:
@@ -193,11 +192,12 @@ class BinaryClassificationSchema:
         Returns:
             List[str]: The list of allowed values for the specified categorical feature.
         """
-        fields = self.schema["predictors"]
-        for field in fields:
-            if field["dataType"] == "CATEGORICAL" and field["name"] == feature_name:
-                return field["allowedValues"]
+        features = self.schema["features"]
+        for feature in features:
+            if feature["dataType"] == "CATEGORICAL" and feature["name"] == feature_name:
+                return feature["categories"]
         raise ValueError(f"Categorical feature '{feature_name}' not found in the schema.")
+
 
     def get_description_for_feature(self, feature_name: str) -> str:
         """
@@ -209,7 +209,7 @@ class BinaryClassificationSchema:
         Returns:
             str: The description for the specified feature.
         """
-        fields = self.schema["predictors"]
+        fields = self.schema["features"]
         for field in fields:
             if field["name"] == feature_name:
                 return field.get("description", "No description for feature available.")
@@ -226,7 +226,7 @@ class BinaryClassificationSchema:
             List[str]: The example values for the specified feature.
         """       
 
-        fields = self.schema["predictors"]
+        fields = self.schema["features"]
         for field in fields:
             if field["name"] == feature_name:
                 if field["dataType"] == "NUMERIC":
@@ -235,6 +235,22 @@ class BinaryClassificationSchema:
                     return field["allowedValues"][0]
                 else:
                     raise ValueError(f"Invalid data type for Feature '{feature_name}' found in the schema.")
+        raise ValueError(f"Feature '{feature_name}' not found in the schema.")
+
+    def is_feature_nullable(self, feature_name: str) -> bool:
+        """
+        Check if a feature is nullable.
+
+        Args:
+            feature_name (str): The name of the feature.
+
+        Returns:
+            bool: True if the feature is nullable, False otherwise.
+        """
+        fields = self.schema["features"]
+        for field in fields:
+            if field["name"] == feature_name:
+                return field.get("nullable", False)
         raise ValueError(f"Feature '{feature_name}' not found in the schema.")
 
     @property

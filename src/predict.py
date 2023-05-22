@@ -109,7 +109,7 @@ def run_batch_predictions(
     predictions_df = get_model_predictions(
         transformed_data,
         predictor_model,
-        data_schema.allowed_target_values,
+        data_schema.target_classes,
         model_config["prediction_field_name"],
         return_probs=True
     )

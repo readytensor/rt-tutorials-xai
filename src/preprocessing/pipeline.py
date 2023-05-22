@@ -45,7 +45,7 @@ def get_preprocess_pipeline(data_schema: Any, pipeline_config: dict) -> Pipeline
     constant_feature_missing = feat_sel_pp_config["constant_feature_dropper"]["missing_values"]
     correl_feature_threshold = feat_sel_pp_config["correlated_feature_dropper"]["threshold"]
 
-    column_selector = transformers.ColumnSelector(columns=data_schema.features)  
+    column_selector = transformers.ColumnSelector(columns=data_schema.features)
     nan_col_dropper = transformers.DropAllNaNFeatures(columns=data_schema.features)
     string_caster = transformers.TypeCaster(
         vars=data_schema.categorical_features + [data_schema.id, data_schema.target],
@@ -136,7 +136,7 @@ def train_pipeline(pipeline: Pipeline, train_data: pd.DataFrame) -> pd.DataFrame
     """
     if not isinstance(train_data, pd.DataFrame):
         raise TypeError("train_data must be a pandas DataFrame")
-    if train_data.empty: 
+    if train_data.empty:
         raise ValueError("train_data cannot be empty")
     pipeline.fit(train_data)
     return pipeline

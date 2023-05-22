@@ -7,7 +7,7 @@ from preprocessing.target_encoder import CustomTargetEncoder
 def test_custom_target_encoder_valid():
     # Given
     df = pd.DataFrame({"target": ["A", "B", "A", "B"]})
-    target_encoder = CustomTargetEncoder(target_field="target", allowed_values=["B", "A"])
+    target_encoder = CustomTargetEncoder(target_field="target", target_classes=["B", "A"])
     expected_result = pd.Series([1, 0, 1, 0], name="target")
     # When
     actual_result = target_encoder.fit_transform(df)
@@ -22,23 +22,23 @@ def test_custom_target_encoder_invalid_target_field():
     """
     # Given
     df = pd.DataFrame({"target": ["A", "B", "A", "B"]})
-    target_encoder = CustomTargetEncoder(target_field="invalid", allowed_values=["A", "B"])
+    target_encoder = CustomTargetEncoder(target_field="invalid", target_classes=["A", "B"])
     # When
     result = target_encoder.fit_transform(df)
     # Then
     assert result is None
 
 
-def test_custom_target_encoder_invalid_allowed_values():
+def test_custom_target_encoder_invalid_target_classes():
     """
-    Test CustomTargetEncoder with invalid allowed_values.
+    Test CustomTargetEncoder with invalid target_classes.
     The transformation should raise a ValueError.
     """
     # Given
     df = pd.DataFrame({"target": ["A", "B", "A", "B"]})
     # When/Then
     with pytest.raises(ValueError):
-        target_encoder = CustomTargetEncoder(target_field="target", allowed_values=["C", "D"])
+        target_encoder = CustomTargetEncoder(target_field="target", target_classes=["C", "D"])
         _ = target_encoder.fit_transform(df)
 
 
@@ -49,7 +49,7 @@ def test_custom_target_encoder_empty_dataframe():
     """
     # Given
     df = pd.DataFrame()
-    target_encoder = CustomTargetEncoder(target_field="target", allowed_values=["A", "B"])
+    target_encoder = CustomTargetEncoder(target_field="target", target_classes=["A", "B"])
     # When
     result = target_encoder.fit_transform(df)
     # Then
@@ -62,7 +62,7 @@ def test_custom_target_encoder_positive_class_always_1():
     """
     # Given
     df = pd.DataFrame({"target": ["A", "A", "A", "B"]})
-    target_encoder = CustomTargetEncoder(target_field="target", allowed_values=["A", "B"])
+    target_encoder = CustomTargetEncoder(target_field="target", target_classes=["A", "B"])
     # When
     result = target_encoder.fit_transform(df)
     # Then
@@ -70,7 +70,7 @@ def test_custom_target_encoder_positive_class_always_1():
 
     # Given
     df = pd.DataFrame({"target": ["A", "A", "A", "B"]})
-    target_encoder = CustomTargetEncoder(target_field="target", allowed_values=["B", "A"])
+    target_encoder = CustomTargetEncoder(target_field="target", target_classes=["B", "A"])
     # When
     result = target_encoder.fit_transform(df)
     # Then
@@ -86,7 +86,7 @@ def test_custom_target_encoder_only_positive_class():
     df = pd.DataFrame({"target": ["A", "A", "A"]})
     # When/Then
     with pytest.raises(ValueError):
-        target_encoder = CustomTargetEncoder(target_field="target", allowed_values=["B", "A"])
+        target_encoder = CustomTargetEncoder(target_field="target", target_classes=["B", "A"])
         _ = target_encoder.fit_transform(df)
 
 
@@ -99,5 +99,5 @@ def test_custom_target_encoder_only_negative_class():
     df = pd.DataFrame({"target": ["A", "A", "A"]})
     # When/Then
     with pytest.raises(ValueError):
-        target_encoder = CustomTargetEncoder(target_field="target", allowed_values=["A", "B"])
+        target_encoder = CustomTargetEncoder(target_field="target", target_classes=["A", "B"])
         _ = target_encoder.fit_transform(df)

@@ -7,22 +7,22 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 class CustomTargetEncoder(BaseEstimator, TransformerMixin):
     """ Binarizes the target variable to 0/1 values."""
-    def __init__(self, target_field:str, allowed_values: List[str]) -> None:
+    def __init__(self, target_field:str, target_classes: List[str]) -> None:
         """
         Initializes a new instance of the `CustomTargetEncoder` class.
 
-        Order of the classes in allowed_values matter.
-        allowed_values[0] is encoded as 0, and
-        allowed_values[1] is encoded as 1 (i.e. treated as positive class)
+        Order of the classes in target_classes matter.
+        target_classes[0] is encoded as 0 (i.e. the negative class), and
+        target_classes[1] is encoded as 1 (i.e. treated as positive class)
 
         Args:
             target_field: str
                 Name of the target field.
-            allowed_values: List[str]
+            target_classes: List[str]
                 Class labels in a list.
         """
         self.target_field = target_field
-        self.classes_ = [str(c) for c in allowed_values]
+        self.classes_ = [str(c) for c in target_classes]
         self.class_encoding = {self.classes_[0]:0, self.classes_[1]:1}
 
     def fit(self, data):
@@ -69,7 +69,7 @@ def get_target_encoder(
     # Create a target encoder instance
     encoder = CustomTargetEncoder(
         target_field=data_schema.target,
-        allowed_values=data_schema.allowed_target_values)
+        target_classes=data_schema.target_classes)
     return encoder
 
 
@@ -131,7 +131,7 @@ def load_target_encoder(file_path_and_name: str) -> CustomTargetEncoder:
 if __name__ == "__main__":
     df = pd.DataFrame()
     target_encoder = CustomTargetEncoder(
-        target_field="target", allowed_values=["A", "B"])
+        target_field="target", target_classes=["A", "B"])
     result = target_encoder.fit_transform(df)
     print(result)
     print(type(result))

@@ -13,57 +13,6 @@ from preprocessing.preprocess import (
 )
 
 
-# Fixture to create a sample schema for testing
-@pytest.fixture
-def schema_provider():
-    """Provide a valid BinaryClassificationSchema for testing."""
-    valid_schema = {
-        "title": "test dataset",
-        "description": "test dataset",
-        "problemCategory": "binary_classification",
-        "version": 1.0,
-        "inputDataFormat": "CSV",
-        "id": {
-            "name": "id",
-            "description": "unique identifier."
-        },
-        "target": {
-            "name": "target_field",
-            "description":  "some target desc.",
-            "allowedValues" :     ["A", "B"],
-            "positiveClass": "A"
-        },
-        "predictors": [
-            {
-                "name": "numeric_feature_1",
-                "description": "some desc.",
-                "dataType": "NUMERIC",
-                "example": 10
-            },
-            {
-                "name": "numeric_feature_2",
-                "description": "some desc.",
-                "dataType": "NUMERIC",
-                "example": 1.1
-            },
-            {
-                "name": "categorical_feature_1",
-                "description": "some desc.",
-                "dataType": "CATEGORICAL",
-                "allowedValues": ["A", "B", "C"]
-            },
-            {
-                "name": "categorical_feature_2",
-                "description": "some desc.",
-                "dataType": "CATEGORICAL",
-                "allowedValues": ["X", "Y", "Z"]
-            }
-        ]
-    }
-    return BinaryClassificationSchema(valid_schema)
-
-
-
 # Fixture to create a sample train dataFrame for testing
 @pytest.fixture
 def train_split_provider():    
@@ -154,8 +103,6 @@ def test_save_and_load_pipeline_and_target_encoder(
         assert loaded_target_encoder is not None
     transformed_inputs_2, transformed_targets_2 = transform_data(
         loaded_preprocess_pipeline, loaded_target_encoder, train_split_provider)
-    print(transformed_inputs)
-    print(transformed_inputs_2)
     assert transformed_inputs.equals(transformed_inputs_2)
     assert transformed_targets.equals(transformed_targets_2)
     

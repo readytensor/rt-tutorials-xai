@@ -29,6 +29,7 @@ class ModelResources:
             pipeline_file_path: str = paths.PIPELINE_FILE_PATH,
             target_encoder_file_path: str = paths.TARGET_ENCODER_FILE_PATH,
             model_config_file_path: str = paths.MODEL_CONFIG_FILE_PATH,
+            explainer_file_path: str = paths.EXPLAINER_FILE_PATH,
         ):
         self.data_schema = load_saved_schema(saved_schema_path)
         self.predictor_model = load_predictor_model(predictor_file_path)
@@ -37,7 +38,7 @@ class ModelResources:
             target_encoder_file_path
         )
         self.model_config = read_json_as_dict(model_config_file_path)
-        self.explainer = load_explainer(paths.EXPLAINER_FILE_PATH)
+        self.explainer = load_explainer(explainer_file_path)
 
 
 def get_model_resources():
@@ -96,7 +97,7 @@ def create_predictions_response(
     Returns:
         dict: The response data in a dictionary.
     """
-    class_names = data_schema.allowed_target_values
+    class_names = data_schema.target_classes
     # find predicted class which has the highest probability
     predictions_df["__predicted_class"] = predictions_df[class_names].idxmax(axis=1)
     sample_predictions = [
@@ -145,7 +146,7 @@ async def transform_req_data_and_make_predictions(
     predictions_df = get_model_predictions(
         transformed_data,
         model_resources.predictor_model,
-        model_resources.data_schema.allowed_target_values,
+        model_resources.data_schema.target_classes,
         model_resources.model_config["prediction_field_name"],
         return_probs=True)
     predictions_df_with_ids = add_ids_to_predictions(
@@ -215,11 +216,12 @@ async def explain(request: InferenceRequestBodyModel,
     """
     transformed_data, predictions_response = \
         await transform_req_data_and_make_predictions(request, model_resources)
+    print(transformed_data)
     explanations = get_explanations_from_explainer(
         instances_df=transformed_data,
         explainer=model_resources.explainer,
         predictor_model=model_resources.predictor_model,
-        class_names=model_resources.data_schema.allowed_target_values
+        class_names=model_resources.data_schema.target_classes
     )
     predictions_response = update_predictions_response_with_explanations(
         predictions_response=predictions_response,
