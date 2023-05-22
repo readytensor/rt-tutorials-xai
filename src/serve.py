@@ -216,7 +216,6 @@ async def explain(request: InferenceRequestBodyModel,
     """
     transformed_data, predictions_response = \
         await transform_req_data_and_make_predictions(request, model_resources)
-    print(transformed_data)
     explanations = get_explanations_from_explainer(
         instances_df=transformed_data,
         explainer=model_resources.explainer,
