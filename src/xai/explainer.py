@@ -128,7 +128,6 @@ def fit_and_save_explainer(
     )
     explainer.fit(train_data)
     explainer.save(output_file_path)
-    print("train_data", train_data.shape)
     return explainer
 
 
