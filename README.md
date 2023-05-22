@@ -1,7 +1,5 @@
 ## Introduction
 
-This repository demonstrates how to create an inference service for a Random Forest binary classifier model using FastAPI and uvicorn.
-
 This repository is part of a tutorial series on Ready Tensor, a web platform for AI developers and users. It is referenced in the tutorial called **Enhancing Model Interpretability with Shapley Values: An Explainable AI (XAI) Approach**. The purpose of the tutorial series is to help AI developers create adaptable algorithm implementations that avoid hard-coding your logic to a specific dataset. This makes it easier to re-use your algorithms with new datasets in the future without requiring any code change.
 
 ## Repository Contents
