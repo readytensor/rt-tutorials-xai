@@ -12,7 +12,6 @@ from src.utils import (
     read_csv_in_directory,
     set_seeds,
     split_train_val,
-    load_and_split_data,
     save_dataframe_as_csv)
 
 
@@ -112,28 +111,6 @@ def test_read_csv_in_directory(tmpdir):
     df_read = read_csv_in_directory(str(tmpdir.join("sub")))
     pd.testing.assert_frame_equal(df_read, df_test)
 
-    # Invalid case: No CSV file in the directory
-    with pytest.raises(ValueError, match="No CSV file found in directory"):
-        read_csv_in_directory(r"C:\nonexistent_directory")
-
-    # Invalid case: Multiple CSV files in the directory
-    file_path_2 = tmpdir.mkdir("sub2").join("test2.csv")
-    df_test.to_csv(file_path_2, index=False)
-    with pytest.raises(ValueError, match="Multiple CSV files found in directory"):
-        read_csv_in_directory(str(tmpdir.join("sub2")))
-
-
-def test_read_csv_in_directory(tmpdir):
-    """
-    Test the function read_csv_in_directory with valid and invalid inputs.
-    """
-    # Valid case: Create a CSV file in a temporary directory
-    file_path = tmpdir.mkdir("sub").join("test.csv")
-    df_test = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
-    df_test.to_csv(file_path, index=False)
-    df_read = read_csv_in_directory(str(tmpdir.join("sub")))
-    pd.testing.assert_frame_equal(df_read, df_test)
-
     # Invalid case: Directory does not exist
     with pytest.raises(FileNotFoundError, match="Directory does not exist"):
         read_csv_in_directory(r"C:\nonexistent_directory")
@@ -196,35 +173,6 @@ def test_set_seeds():
         set_seeds(42.0)
     with pytest.raises(Exception, match="Invalid seed value"):
         set_seeds("Invalid")
-
-
-def test_load_and_split_data():
-    """
-    Test the load_and_split_data function.
-    """
-    with TemporaryDirectory() as tmpdir:
-        # Create a test CSV file in the temporary directory
-        df = pd.DataFrame({'col1': range(10), 'col2': range(10)})
-        file_path = os.path.join(tmpdir, 'test.csv')
-        df.to_csv(file_path, index=False)
-
-        # Load and split the data using the function
-        train_split, val_split = load_and_split_data(file_dir_path=tmpdir, val_pct=0.2)
-
-        # Check the results
-        assert isinstance(train_split, pd.DataFrame)
-        assert isinstance(val_split, pd.DataFrame)
-        assert len(train_split) == 8  # 80% of 10
-        assert len(val_split) == 2  # 20% of 10
-
-
-def test_load_and_split_data_no_file():
-    """
-    Test the load_and_split_data function when no CSV file exists in the directory.
-    """
-    with TemporaryDirectory() as tmpdir:
-        with pytest.raises(ValueError):
-            load_and_split_data(file_dir_path=tmpdir, val_pct=0.2)
 
 
 def test_save_dataframe_as_csv():

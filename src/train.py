@@ -5,7 +5,8 @@ from schema.data_schema import load_json_data_schema, save_schema
 from config import paths
 from utils import (
     set_seeds,
-    load_and_split_data,
+    read_csv_in_directory,
+    split_train_val,
     read_json_as_dict
 )
 from preprocessing.preprocess import (
@@ -67,9 +68,12 @@ def run_training(
     model_config = read_json_as_dict(model_config_file_path)
     set_seeds(seed_value=model_config["seed_value"])
 
-    # load train data and perform train/validation split
-    train_split, val_split = load_and_split_data(
-        file_dir_path=train_dir, val_pct=model_config["validation_split"])
+    # load train data
+    train_data = read_csv_in_directory(file_dir_path=train_dir)
+
+    # split train data into training and validation sets
+    train_split, val_split = split_train_val(
+        train_data, val_pct=model_config["validation_split"])
 
     # fit and transform using pipeline and target encoder, then save them
     pipeline, target_encoder = train_pipeline_and_target_encoder(

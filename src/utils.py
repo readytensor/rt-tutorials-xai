@@ -3,7 +3,6 @@ import json
 import numpy as np
 import pandas as pd
 import random
-import tempfile
 from typing import Union, Dict, Tuple, Any, List
 from sklearn.model_selection import train_test_split
 
@@ -110,23 +109,6 @@ def split_train_val(data: pd.DataFrame, val_pct: float) -> Tuple[pd.DataFrame, p
     """
     train_data, val_data = train_test_split(data, test_size=val_pct, random_state=42)
     return train_data, val_data
-
-
-def load_and_split_data(file_dir_path: str, val_pct: float) -> \
-        Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Load and split the data into training and validation sets.
-
-    Args:
-        file_dir_path: Path to the directory from where to load the CSV.
-        val_pct: The percentage of the data to be used for validation.
-
-    Returns:
-        A tuple containing the data schema, training split, and validation split.
-    """
-    train_data = read_csv_in_directory(file_dir_path=file_dir_path)
-    train_split, val_split = split_train_val(train_data, val_pct=val_pct)
-    return train_split, val_split
 
 
 def save_dataframe_as_csv(dataframe: pd.DataFrame, file_path: str) -> None:
