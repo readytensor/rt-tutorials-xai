@@ -85,7 +85,6 @@ binary_class_project/
 - Run the `train.py` script to train the model, with `--tune` or `-t` flag for hyperparameter tuning. If the flag is not provided, the model will be trained with default hyperparameters. This will save the model artifacts, including the preprocessing pipeline and label encoder, and the explainer, in the path `./model/artifacts/`. When tuning is requested, the hyperparameter tuning results will be saved in a file called `hpt_results.csv` in the path `./outputs/hpt_outputs/`. The best hyperparameters are used in the trained model.
 - Run the script `predict.py` to run test predictions using the trained model. This script will load the artifacts and create and save the predictions in a file called `predictions.csv` in the path `./outputs/predictions/`.
 - Run the script `serve.py` to start the inference service, which can be queried using the `/ping`, `/infer` and `/explain` endpoints.
-- Send a POST request to the endpoint `/infer` using curl. See sample curl command:
 
 **Getting predictions ** <br/>
 To get predictions for a single sample, use the following command:
