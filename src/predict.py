@@ -15,59 +15,46 @@ from prediction.predictor_model import load_predictor_model, predict_with_model
 from config import paths
 
 
-def get_model_predictions(
-        transformed_data: pd.DataFrame,
-        predictor_model: Any,
+def create_predictions_dataframe(
+        predictions_arr: np.ndarray,
         class_names: List[str],
         prediction_field_name: str,
+        ids: pd.Series,
+        id_field_name: str,
         return_probs: bool = False) -> pd.DataFrame:
     """
-    Make predictions on transformed input data using the predictor_model.
+    Converts the predictions numpy array into a dataframe having the required structure.
+
+    Performs the following transformations:
+    - converts to pandas dataframe
+    - adds column headers with class labels for predicted probabilities
+    - inserts the id column
 
     Args:
-        transformed_data (np.ndarray): Transformed data to be predicted.
-        predictor_model (Any): A trained predictor model.
-        class_names List[str]: List of target classes (labels)
-        prediction_field_name (str): Field name to use for predicted class
-        return_probs (bool, optional): If True, returns the predicted probabilities for each class.
-                                       If False, returns the final predicted class for each data point.
-                                       Defaults to False.
+        predictions_arr (np.ndarray): Predicted probabilities from predictor model.
+        class_names List[str]: List of target classes (labels).
+        prediction_field_name (str): Field name to use for predicted class.
+        ids: ids as a numpy array for each of the samples in  predictions.
+        id_field_name (str): Name to use for the id field.
+        return_probs (bool, optional): If True, returns the predicted probabilities
+            for each class. If False, returns the final predicted class for each
+            data point. Defaults to False.
 
     Returns:
-        pd.DataFrame: A DataFrame with the same length as the input data. Contains either the
-                      predicted probabilities or the final prediction for each data point.
+        Predictions as a pandas dataframe
     """
-    predictions_arr = predict_with_model(
-        predictor_model, transformed_data, return_probs=True)
+    if predictions_arr.shape[1] != len(class_names):
+        raise ValueError("Length of class names does not match number of prediction columns")    
     predictions_df = pd.DataFrame(predictions_arr, columns=class_names)
+    if len(predictions_arr) != len(ids):
+        raise ValueError("Length of ids does not match number of predictions")   
+    predictions_df.insert(0, id_field_name, ids)
     if return_probs:
         return predictions_df
     predictions_df[prediction_field_name] = \
         predictions_df[class_names].idxmax(axis=1)
     predictions_df.drop(class_names, axis=1, inplace=True)
     return predictions_df
-
-
-def add_ids_to_predictions(
-        input_data: pd.DataFrame,
-        predictions: pd.DataFrame,
-        id_field_name: str):
-    """
-    Insert the id column in the predictions dataframe.
-
-    Takes the id column from given input data and inserts it into the predictions dataframe.
-    Assumes the order was mained in the predictions.
-
-    Args:
-         input_data (pd.Dataframe): Input data for predictions.
-         predictions (pd.Dataframe): Predictions dataframe.
-         id_field_name (str): Name to use for the id field.
-
-    Returns:
-        pd.DataFrame: The predictions dataframe with ids
-    """
-    predictions.insert(0, id_field_name, input_data[id_field_name].values)
-    return predictions
 
 
 def run_batch_predictions(
@@ -106,22 +93,21 @@ def run_batch_predictions(
     )
     transformed_data, _ = transform_data(preprocessor, target_encoder, test_data)
     predictor_model = load_predictor_model(predictor_file_path)
-    predictions_df = get_model_predictions(
-        transformed_data,
-        predictor_model,
+    predictions_arr = predict_with_model(
+        predictor_model, transformed_data, return_probs=True)
+    predictions_df = create_predictions_dataframe(
+        predictions_arr,
         data_schema.target_classes,
         model_config["prediction_field_name"],
+        test_data[data_schema.id],
+        data_schema.id,
         return_probs=True
     )
-    predictions_df_with_ids = add_ids_to_predictions(
-        test_data, predictions_df, data_schema.id)
-
     save_dataframe_as_csv(
-        dataframe=predictions_df_with_ids,
+        dataframe=predictions_df,
         file_path=predictions_file_path,
     )
     print("Batch predictions completed successfully")
-
 
 
 if __name__ == "__main__":

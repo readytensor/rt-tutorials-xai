@@ -1,90 +1,109 @@
 import os
 import pandas as pd
 import numpy as np
+import pytest
 from predict import (
-    get_model_predictions,
-    add_ids_to_predictions,
+    create_predictions_dataframe,
     run_batch_predictions
 )
 from train import run_training
 
 
-def test_get_model_predictions(monkeypatch):
+def test_create_predictions_dataframe_return_probs_true():
     """
-    Test the get_model_predictions function to ensure it correctly makes predictions.
-
-    This unit test replaces the predict_with_model function and verifies that
-    the get_model_predictions function correctly transforms the probabilities into
-    a DataFrame with the class names as columns. It also checks the function's
-    behavior when the return_probs parameter is set to False, ensuring that the
-    function correctly identifies the class with the highest probability for each
-    data point.
+    Test the function 'create_predictions_dataframe' with 'return_probs' set to True.
+    Checks if the output is a DataFrame, if its shape and column names are correct,
+    and if the ID values match the input.
     """
-    # Arrange
-    class_names = ['A', 'B']
+    np.random.seed(0)
+    predictions_arr = np.random.rand(5, 2)
+    class_names = ['class_1', 'class_2']
     prediction_field_name = 'predicted_class'
+    ids = pd.Series(np.random.choice(1000, 5))
+    id_field_name = 'id'
+    return_probs = True
 
-    transformed_data = pd.DataFrame({
-        'feature1': [1, 2],
-        'feature2': [3, 4]
-    })
+    df = create_predictions_dataframe(
+        predictions_arr, class_names, prediction_field_name,
+        ids, id_field_name, return_probs)
 
-    expected_output_probs = pd.DataFrame({
-        'A': [0.8, 0.4],
-        'B': [0.2, 0.6]
-    })
-
-    expected_output_class = pd.DataFrame({
-        prediction_field_name: ['A', 'B']
-    })
-
-    predictor_model = "mock_predictor_model"
-
-    def mock_predict_with_model(*args, **kwargs):
-        return np.array([[0.8, 0.2], [0.4, 0.6]])
-
-    monkeypatch.setattr('predict.predict_with_model', mock_predict_with_model)
-
-    # Act and Assert
-    # Test when return_probs=True
-    output = get_model_predictions(
-        transformed_data, predictor_model, class_names, prediction_field_name, return_probs=True)
-    pd.testing.assert_frame_equal(output, expected_output_probs)
-
-    # Test when return_probs=False
-    output = get_model_predictions(
-        transformed_data, predictor_model, class_names, prediction_field_name, return_probs=False)
-    pd.testing.assert_frame_equal(output, expected_output_class)
+    assert isinstance(df, pd.DataFrame), "Output is not a pandas DataFrame"
+    assert df.shape == (5, 3), "Output shape is not correct"
+    assert list(df.columns) == [id_field_name] + class_names, "Column names are incorrect"
+    assert df[id_field_name].equals(ids), "Ids are not correct"
 
 
-
-def test_add_ids_to_predictions(sample_test_data, schema_provider):
+def test_create_predictions_dataframe_return_probs_false():
     """
-    Test the add_ids_to_predictions function to ensure it correctly adds IDs to the predictions DataFrame.
+    Test the function 'create_predictions_dataframe' with 'return_probs' set to False.
+    Checks if the output is a DataFrame, if its shape and column names are correct,
+    and if the ID values and predicted classes match the input.
     """
-    # Create a sample predictions DataFrame
-    num_rows = len(sample_test_data)
-    predictions = pd.DataFrame({
-        schema_provider.target_classes[0]: np.random.rand(num_rows),
-        schema_provider.target_classes[1]: np.random.rand(num_rows)
-    })
-    
-    # Run the function
-    result = add_ids_to_predictions(sample_test_data, predictions, schema_provider.id)
-    print(sample_test_data.head())
-    print(result.head())
+    np.random.seed(0)
+    predictions_arr = np.random.rand(5, 3)
+    class_names = ['class_1', 'class_2', 'class_3']
+    prediction_field_name = 'predicted_class'
+    ids = pd.Series(np.random.choice(1000, 5))
+    id_field_name = 'id'
+    return_probs = False
 
-    # Check the columns of the result
-    assert list(result.columns) == [schema_provider.id] + schema_provider.target_classes
+    df = create_predictions_dataframe(
+        predictions_arr, class_names, prediction_field_name,
+        ids, id_field_name, return_probs)
 
-    # Check the IDs of the result
-    assert list(result[schema_provider.id]) == list(sample_test_data[schema_provider.id])
+    assert isinstance(df, pd.DataFrame), "Output is not a pandas DataFrame"
+    assert df.shape == (5, 2), "Output shape is not correct"
+    assert list(df.columns) == [id_field_name, prediction_field_name], "Column names are incorrect"
+    assert df[id_field_name].equals(ids), "Ids are not correct"
+    assert all(df[prediction_field_name].isin(class_names)), "Some predicted classes are not from the class_names"
 
-    # Check the values of class 0 and class 1
-    assert list(result[schema_provider.target_classes[0]]) == \
-        list(predictions[schema_provider.target_classes[0]])
-    assert list(result[schema_provider.target_classes[1]]) == \
-        list(predictions[schema_provider.target_classes[1]])
+
+def test_create_predictions_dataframe_mismatch_ids_and_predictions():
+    """
+    Test the function 'create_predictions_dataframe' for a case where the length of
+    the 'ids' series doesn't match the number of rows in 'predictions_arr'.
+    Expects a ValueError with a specific message.
+    """
+    np.random.seed(0)
+    predictions_arr = np.random.rand(5, 3)
+    class_names = ['class_1', 'class_2', 'class_3']
+    prediction_field_name = 'predicted_class'
+    ids = pd.Series(np.random.choice(1000, 4))  # Mismatch in size
+    id_field_name = 'id'
+    return_probs = True
+
+    with pytest.raises(ValueError) as exception_info:
+        _ = create_predictions_dataframe(
+            predictions_arr, class_names, prediction_field_name, ids,
+            id_field_name, return_probs)
+
+    assert str(exception_info.value) == \
+        "Length of ids does not match number of predictions", \
+            "Exception message does not match"
+
+
+def test_create_predictions_dataframe_mismatch_class_names_and_predictions():
+    """
+    Test the function 'create_predictions_dataframe' for a case where the length of
+    the 'class_names' list doesn't match the number of columns in 'predictions_arr'.
+    Expects a ValueError with a specific message.
+    """
+    np.random.seed(0)
+    predictions_arr = np.random.rand(5, 3)
+    class_names = ['class_1', 'class_2']  # Mismatch in size
+    prediction_field_name = 'predicted_class'
+    ids = pd.Series(np.random.choice(1000, 5))
+    id_field_name = 'id'
+    return_probs = True
+
+    with pytest.raises(ValueError) as exception_info:
+        _ = create_predictions_dataframe(
+            predictions_arr, class_names, prediction_field_name,
+            ids, id_field_name, return_probs)
+
+    assert str(exception_info.value) == \
+        "Length of class names does not match number of prediction columns", \
+            "Exception message does not match"
 
 
 def test_integration_run_batch_predictions_without_hpt(
