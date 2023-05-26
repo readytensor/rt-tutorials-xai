@@ -138,7 +138,7 @@ class SKOHyperparameterTuner():
         Returns:
             A dictionary containing the best model name, hyperparameters, and score.
         """
-        # Use 1/3 of the trials to explore the space initially, but at least 5 trials
+        # Use 1/3 of the trials to explore the space initially, but at most 5 trials
         n_initial_points = max(1, min(self.num_trials // 3, 5))
         objective_func = self._get_objective_func(train_X, train_y, valid_X, valid_y)
         optimizer_results = gp_minimize(
