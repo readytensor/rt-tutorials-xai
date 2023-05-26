@@ -27,7 +27,7 @@ def create_predictions_dataframe(
 
     Performs the following transformations:
     - converts to pandas dataframe
-    - adds column headers with class labels for predicted probabilities
+    - adds class labels as headers for columns containing predicted probabilities
     - inserts the id column
 
     Args:
