@@ -279,7 +279,7 @@ def load_json_data_schema(schema_dir_path:str) -> BinaryClassificationSchema:
     Load the JSON file schema into a dictionary and instantiate the schema provider.
 
     Args:
-    - df (pd.DataFrame): The pandas dataframe to be saved.
+    - schema_dir_path (str): Path from where to read the schema json file.
 
     Returns:
         BinaryClassificationSchema: An instance of the BinaryClassificationSchema.
