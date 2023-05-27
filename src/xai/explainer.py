@@ -117,8 +117,8 @@ def fit_and_save_explainer(
         train_data (pd.DataFrame): pandas DataFrame of training data
         explainer_config_file_path (str): Path to the explainer configuration file.
         output_file_path (str): Path where train data should be saved.
-    
-    Returns: 
+
+    Returns:
         ShapClassificationExplainer: Instance of ShapClassificationExplainer
     """
     explainer_config = read_json_as_dict(explainer_config_file_path)
