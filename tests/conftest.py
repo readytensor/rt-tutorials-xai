@@ -2,10 +2,12 @@ import pytest
 import pandas as pd
 import numpy as np
 import json
+import os
 import random
 import string
 
 from src.schema.data_schema import BinaryClassificationSchema
+from src.serve_utils import get_model_resources
 
 
 @pytest.fixture
@@ -289,3 +291,24 @@ def explainer_config_file_path(explainer_config, tmpdir):
 def explainer_file_path(tmpdir):
     file_path = str(tmpdir.join("explainer.joblib"))
     return file_path
+
+
+@pytest.fixture
+def resources_paths():
+    """Define a fixture for the paths to the test model resources."""
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    test_resources_path = os.path.join(cur_dir, "test_resources")
+    return {
+        'saved_schema_path': os.path.join(test_resources_path, 'schema.joblib'),
+        'predictor_file_path': os.path.join(test_resources_path, 'predictor.joblib'),
+        'pipeline_file_path': os.path.join(test_resources_path, 'pipeline.joblib'),
+        'target_encoder_file_path': os.path.join(test_resources_path, 'target_encoder.joblib'),
+        'model_config_file_path': os.path.join(test_resources_path, 'model_config.json'),
+        'explainer_file_path': os.path.join(test_resources_path, 'explainer.joblib')
+    }
+
+
+@pytest.fixture
+def model_resources(resources_paths):
+    """Define a fixture for the test ModelResources object."""
+    return get_model_resources(**resources_paths)

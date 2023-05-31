@@ -3,11 +3,8 @@ import os
 import numpy as np
 import pandas as pd
 import json
-from typing import Any
-from skopt.space import Real, Categorical, Integer, Space
-from skopt.optimizer import Optimizer
-from skopt.utils import OptimizeResult
-from skopt import gp_minimize
+import pytest
+from skopt.space import Real, Categorical, Integer
 from hyperparameter_tuning.tuner import (
     SKOHyperparameterTuner,
     tune_hyperparameters
@@ -236,8 +233,8 @@ def test_tune_hyperparameters(
         hpt_specs_file_path, hpt_specs):
     """Tests the `tune_hyperparameters` function.
 
-    This test verifies that the `tune_hyperparameters` function correctly 
-    instantiates the `SKOHyperparameterTuner` class with the right parameters 
+    This test verifies that the `tune_hyperparameters` function correctly
+    instantiates the `SKOHyperparameterTuner` class with the right parameters
     and that the `run_hyperparameter_tuning` method is called with the correct arguments.
     """
     

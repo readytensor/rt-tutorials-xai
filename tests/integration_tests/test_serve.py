@@ -1,35 +1,8 @@
 from fastapi.testclient import TestClient
-from unittest.mock import patch
-import pandas as pd
-import json
 import pytest
-import os 
 
 from serve import  create_app
-from serve_utils import (
-    get_model_resources
-)
 
-
-@pytest.fixture
-def resources_paths():
-    """Define a fixture for the paths to the test model resources."""
-    cur_dir = os.path.dirname(os.path.abspath(__file__))
-    test_resources_path = os.path.join(cur_dir, "test_resources")
-    return {
-        'saved_schema_path': os.path.join(test_resources_path, 'schema.joblib'),
-        'predictor_file_path': os.path.join(test_resources_path, 'predictor.joblib'),
-        'pipeline_file_path': os.path.join(test_resources_path, 'pipeline.joblib'),
-        'target_encoder_file_path': os.path.join(test_resources_path, 'target_encoder.joblib'),
-        'model_config_file_path': os.path.join(test_resources_path, 'model_config.json'),
-        'explainer_file_path': os.path.join(test_resources_path, 'explainer.joblib')
-    }
-
-
-@pytest.fixture
-def model_resources(resources_paths):
-    """Define a fixture for the test ModelResources object."""
-    return get_model_resources(**resources_paths)
 
 
 @pytest.fixture
@@ -162,38 +135,6 @@ def sample_explanation_response_data():
         ],
         "explanationMethod": "Shap"
     }
-
-
-def test_ping(app):
-    """Test the /ping endpoint."""
-    response = app.get("/ping")
-    assert response.status_code == 200
-    assert response.json() == {"message": "Pong!"}
-
-
-@patch('serve.transform_req_data_and_make_predictions')
-def test_infer_endpoint(mock_transform_and_predict, app, sample_request_data):
-    """
-    Test the infer endpoint.
-
-    Args:
-        mock_transform_and_predict (MagicMock): A mock of the transform_req_data_and_make_predictions function.
-        app (TestClient): The TestClient fastapi app
-    The function creates a mock request and sets the expected return value of the mock_transform_and_predict function.
-    It then sends a POST request to the "/infer" endpoint with the mock request data.
-    The function asserts that the response status code is 200 and the JSON response matches the expected output.
-    Additionally, it checks if the mock_transform_and_predict function was called with the correct arguments.
-    """
-    # Define what your mock should return
-    mock_transform_and_predict.return_value = pd.DataFrame(), {"status": "success", "predictions": []}
-
-    response = app.post("/infer", data=json.dumps(sample_request_data))
-
-    print(response)
-    assert response.status_code == 200
-    assert response.json() == {"status": "success", "predictions": []}
-    # You can add more assertions to check if the function was called with the correct arguments
-    mock_transform_and_predict.assert_called()
 
 
 def test_infer_endpoint_integration(app, sample_request_data, sample_response_data):

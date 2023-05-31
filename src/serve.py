@@ -6,6 +6,7 @@ import uvicorn
 
 from xai.explainer import get_explanations_from_explainer
 from serve_utils import (
+    ModelResources,
     get_model_resources,
     generate_unique_request_id,
     transform_req_data_and_make_predictions,
@@ -75,20 +76,18 @@ def create_app(model_resources):
         )
         predictions_response = combine_predictions_response_with_explanations(
             predictions_response=predictions_response,
-            explanations=explanations
-        )
-        return predictions_response       
+            explanations=explanations)
+        return predictions_response
 
     return app
 
 
-def create_and_run_app(model_resources=get_model_resources()):
+def create_and_run_app(model_resources:ModelResources):
     """Create and run Fastapi app for inference service
-    
+
     Args:
         model (ModelResources, optional): The model resources instance.
             Defaults to load model resources from paths defined in paths.py.
-    
     """
     app = create_app(model_resources)
     print("Starting service. Listening on port 8080.")
@@ -96,4 +95,4 @@ def create_and_run_app(model_resources=get_model_resources()):
 
 
 if __name__ == "__main__":
-    create_and_run_app()
+    create_and_run_app(model_resources=get_model_resources())

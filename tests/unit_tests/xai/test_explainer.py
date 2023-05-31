@@ -6,7 +6,7 @@ import pytest
 from pathlib import Path
 from py.path import local as LocalPath
 
-from xai.explainer import (
+from src.xai.explainer import (
     ShapClassificationExplainer, 
     fit_and_save_explainer, 
     load_explainer,

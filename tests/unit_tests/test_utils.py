@@ -5,7 +5,6 @@ import tempfile
 import pytest
 import pandas as pd
 import numpy as np
-from tempfile import TemporaryDirectory
 
 from src.utils import (
     read_json_as_dict,

@@ -3,9 +3,9 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 from serve_utils import (
+    get_model_resources,
     generate_unique_request_id,
-    create_predictions_response,
-    get_model_resources
+    create_predictions_response
 )
 
 
