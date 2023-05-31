@@ -6,8 +6,8 @@ import os
 import random
 import string
 
-from src.schema.data_schema import BinaryClassificationSchema
-from src.serve_utils import get_model_resources
+from schema.data_schema import BinaryClassificationSchema
+from serve_utils import get_model_resources
 
 
 @pytest.fixture

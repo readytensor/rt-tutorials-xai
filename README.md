@@ -58,8 +58,10 @@ binary_class_project/
 ├── tmp/
 ├── .gitignore
 ├── LICENSE
+├── pytest.ini
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+└── requirements-test.txt
 ```
 
 - **`/examples`**: This directory contains example files for the titanic dataset. Three files are included: `titanic_schema.json`, `titanic_train.csv` and `titanic_test.csv`. You can place these files in the `inputs/schema`, `inputs/data/training` and `inputs/data/testing` folders, respectively.

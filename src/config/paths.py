@@ -41,15 +41,11 @@ HPT_OUTPUTS_DIR = os.path.join(OUTPUT_DIR, "hpt_outputs")
 HPT_RESULTS_FILE_PATH = os.path.join(HPT_OUTPUTS_DIR, "HPT_results.csv")
 
 # Path to logs directory inside outputs directory
-LOGS_DIR = os.path.join(OUTPUT_DIR, "logs")
-# Log file paths
-TRAIN_LOG_FILE_PATH = os.path.join(LOGS_DIR, "train_log.txt")
-PREDICT_LOG_FILE_PATH = os.path.join(LOGS_DIR, "predict_log.txt")
-SERVE_LOG_FILE_PATH = os.path.join(LOGS_DIR, "serve_log.txt")
+ERRORS_DIR = os.path.join(OUTPUT_DIR, "errors")
 # Error file paths
-TRAIN_ERROR_FILE_PATH = os.path.join(LOGS_DIR, "train_error.txt")
-PREDICT_ERROR_FILE_PATH = os.path.join(LOGS_DIR, "predict_error.txt")
-SERVE_ERROR_FILE_PATH = os.path.join(LOGS_DIR, "serve_error.txt")
+TRAIN_ERROR_FILE_PATH = os.path.join(ERRORS_DIR, "train_error.txt")
+PREDICT_ERROR_FILE_PATH = os.path.join(ERRORS_DIR, "predict_error.txt")
+SERVE_ERROR_FILE_PATH = os.path.join(ERRORS_DIR, "serve_error.txt")
 
 # Paths inside the source directory
 # Path to source directory
